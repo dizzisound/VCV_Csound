@@ -15,6 +15,9 @@ To do:
     afficher la valeur de Transpose dans le display
     ajouter infos sur le fichier
 
+   utiliser assetPlugin pour sauvegarder lastPath par toJson dans le fichier vcv
+     (dans Vocoder.vcv, "lastPath": "/home/moi/Programmes/Rack/plugins/VCV_Csound/samples/hellorcb.wav" !!!)
+
 ****************************************************************/
 
 
@@ -81,7 +84,7 @@ struct Flooper : Module {
             ksmps = csound->GetKsmps();
         }
 	    else {
-	        //cout << "Csound csd compilation error!" << endl;
+	        cout << "Csound csd compilation error!" << endl;
             fileDesc = "Right click to load \n a aiff, wav, ogg or flac audio file";
         }
     }
@@ -149,8 +152,10 @@ void Flooper::loadSample(std::string path) {
     if(!notReady) {
         double *temp;
         int tableSize = csound->GetTable (temp, 1);
-        for (int i=0; i < tableSize; i++)
-			displayBuff.push_back(temp[i]);
+
+        vector<double>().swap(displayBuff);
+	for (int i=0; i < tableSize; i++)
+		displayBuff.push_back(temp[i]);
     }
 };
 
@@ -266,9 +271,9 @@ struct FlooperDisplay : TransparentWidget {         //code from Clement Foulc pl
 			nvgStroke(vg);
             
             // Draw waveform
-			nvgStrokeColor(vg, nvgRGBA(0xff, 0xff, 0x3e, 0x30));            //wave color
+			nvgStrokeColor(vg, nvgRGBA(0xff, 0xff, 0x3e, 0xff));            //wave color
 			nvgSave(vg);
-			Rect b = Rect(Vec(5, 80), Vec(160, 20));
+			Rect b = Rect(Vec(5, 75), Vec(160, 30));
             nvgScissor(vg, b.pos.x, b.pos.y, b.size.x, b.size.y);
 			nvgBeginPath(vg);
 
@@ -287,8 +292,8 @@ struct FlooperDisplay : TransparentWidget {         //code from Clement Foulc pl
 			
 			nvgLineCap(vg, NVG_ROUND);
 			nvgMiterLimit(vg, 2.0);
-			nvgStrokeWidth(vg, 1.5);
-			nvgGlobalCompositeOperation(vg, NVG_LIGHTER);
+			nvgStrokeWidth(vg, 0.5);
+			//nvgGlobalCompositeOperation(vg, NVG_LIGHTER);
 			nvgStroke(vg);			
 			nvgResetScissor(vg);
 			nvgRestore(vg);	
