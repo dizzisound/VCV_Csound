@@ -1,5 +1,5 @@
 SLUG = VCV_Csound
-VERSION = 0.6.0
+VERSION = 0.6.1
 
 # linking to libraries
 LDFLAGS += -L "/usr/local/lib/" -lcsound64
