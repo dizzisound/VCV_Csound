@@ -27,7 +27,7 @@ Csound should be installed in the default location, i.e, includes files should b
 
    'git clone https://github.com/Djack13/VCV_Csound.git'.
 
-3) Copie the Csound module directory in /Rack/plugins/
+3) Copie the VCV_Csound module directory in /Rack/plugins/
 
 4) Then cd to /Rack/plugins/VCV_Csound and compile with make
 
