@@ -4,7 +4,7 @@
 -m229  --omacro:Filepath=/home/moi/Programmes/Rack/plugins/VCV_Csound/samples/hellorcb.wav
 </CsOptions>
 <CsInstruments>
-sr		= 44100
+sr	= 44100
 ksmps	= 32
 nchnls	= 1
 0dbfs	= 1
@@ -12,39 +12,39 @@ nchnls	= 1
 
 				;Channel init
 	 			chn_k	"Mode",		1
-				chn_k	"Gate",			1
-				chn_k	"Start",			1
-				chn_k	"End",			1
+				chn_k	"Gate",		1
+				chn_k	"Start",	1
+				chn_k	"End",		1
 				chn_k	"Transpose",	1
 
 				chn_k	"samplePosition",	2
-				chn_k	"FileSr",	2
-				chn_k	"FileLen",	2
+				chn_k	"FileSr",		2
+				chn_k	"FileLen",		2
 
 
-	iFileSr		filesr		"$Filepath"
-				chnset	iFileSr, "FileSr"
-	giFileLen	filelen 	"$Filepath"
-				chnset	giFileLen, "FileLen"
+	iFileSr		filesr	"$Filepath"
+			chnset	iFileSr, "FileSr"
+	giFileLen	filelen "$Filepath"
+			chnset	giFileLen, "FileLen"
 
-				turnon	1
+			turnon	1
 
-	gitable		ftgen			1, 0, 0, 1, "$Filepath", 0, 0, 1		;channel 1
+	gitable		ftgen	1, 0, 0, 1, "$Filepath", 0, 0, 1		;channel 1
 
 instr	1	;gui
 	gkMode		chnget	"Mode"
-	gkGate			chnget	"Gate"
-	gkStart			chnget	"Start"
-	gkEnd			chnget	"End"
+	gkGate		chnget	"Gate"
+	gkStart		chnget	"Start"
+	gkEnd		chnget	"End"
 	kTranspose	chnget	"Transpose"
-	gkSpeed		=			semitone(int(kTranspose))
+	gkSpeed		= semitone(int(kTranspose))
 	gkRange		= gkEnd - gkStart
 
 	if gkRange == 0 then
 		gkRange = 0.01
 	endif
 
-	ktrig			trigger	gkGate, 0.5, 0
+	ktrig	trigger	gkGate, 0.5, 0
 
 	if gkMode == 1 then 
 		kdur	= -1
@@ -52,7 +52,7 @@ instr	1	;gui
 		kdur	= giFileLen * abs(gkRange) / gkSpeed
 	endif
 
-	schedkwhen		ktrig, 0, 0, 2, 0, kdur, giFileLen
+	schedkwhen	ktrig, 0, 0, 2, 0, kdur, giFileLen
 endin
 
 instr	2
@@ -61,12 +61,11 @@ instr	2
 	endif
 
 	if p4 > 0 then		;BufPlay
-		andxrel	phasor 	(1/p4) * gkSpeed / gkRange
-		andx		=			andxrel * gkRange + gkStart
-		asig		table3		andx, 1, 1
-					out		asig
-
-					chnset	k(andx), "samplePosition"
+		andxrel		phasor 	(1/p4) * gkSpeed / gkRange
+		andx		= andxrel * gkRange + gkStart
+		asig		table3	andx, 1, 1
+				out	asig
+				chnset	k(andx), "samplePosition"
 	endif
 endin
 </CsInstruments>  
