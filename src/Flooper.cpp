@@ -3,101 +3,96 @@
 #include <csound/csound.hpp>
 #include <iostream>
 
-
 using namespace std;
 
 
 struct Flooper : Module {
 	enum ParamIds {
-		START_PARAM,
-		END_PARAM,
-        TRANSPOSE_PARAM,
-        LOOP_PARAM,
-		NUM_PARAMS
+	START_PARAM,
+	END_PARAM,
+	TRANSPOSE_PARAM,
+	LOOP_PARAM,
+	NUM_PARAMS
 	};
 	enum InputIds {
-	    START_INPUT,
-	    END_INPUT,
-        TRANSPOSE_INPUT,
-        GATE_INPUT,
-		NUM_INPUTS
+	START_INPUT,
+	END_INPUT,
+	TRANSPOSE_INPUT,
+	GATE_INPUT,
+	NUM_INPUTS
 	};
 	enum OutputIds {
-		OUT_OUTPUT,
-		NUM_OUTPUTS
+	OUT_OUTPUT,
+	NUM_OUTPUTS
 	};
 	enum LightIds {
-		NUM_LIGHTS
+	NUM_LIGHTS
 	};
 
-    Csound* csound;
-    MYFLT *spin, *spout;
+	Csound* csound;
+	MYFLT *spin, *spout;
 
-    int nbSample = 0;
-    int ksmps, result;
-    bool notReady;
+	int nbSample = 0;
+	int ksmps, result;
+	bool notReady;
 
-    float start, end, transpose, loop, gate, samplePos;
+	float start, end, transpose, loop, gate, samplePos;
 
-    string lastPath = "";
-    string fileDesc = "";
-    string filePath = "";
-
+	string lastPath = "";
+	string fileDesc = "";
+	string filePath = "";
+	
 	vector<double> displayBuff;
 
-
-    static void messageCallback(CSOUND* cs, int attr, const char *format, va_list valist)
-    {
-        //vprintf(format, valist);    //if commented -> disable csound message on terminal
-        return;
-    }
-
-    void csoundCession() {
-        //csd sampling-rate override
-        string sr_override = "--sample-rate=" + to_string(engineGetSampleRate());
-
-        //sample file load
-        string filemacro = "--omacro:Filepath=" + filePath;
-
-        //compile instance of csound
-        notReady = csound->Compile(assetPlugin(plugin, "csd/Flooper.csd").c_str(), (char *) sr_override.c_str(), (char *) filemacro.c_str());
-        if(!notReady)
-        {
-            spout = csound->GetSpout();                                     //access csound output buffer
-            spin  = csound->GetSpin();                                      //access csound input buffer
-            ksmps = csound->GetKsmps();
-
-            fileDesc = stringFilename(filePath)+ "\n";
-            fileDesc += std::to_string((int) csound->GetChannel("FileSr", NULL)) + " Hz" + "\n";
-            fileDesc += std::to_string(csound->GetChannel("FileLen", NULL)) + " s.";
-
-            //display buffer setting
-            double *temp;
-            int tableSize = csound->GetTable(temp, 1);
-
-            vector<double>().swap(displayBuff);
-	        for (int i=0; i < tableSize; i++)
-	        	displayBuff.push_back(temp[i]);
-        }
-	    else {
-	        cout << "Csound csd compilation error!" << endl;
-            fileDesc = "Right click to load \n a aiff, wav, ogg or flac audio file";
-        }
-    }
-
-	Flooper() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS)
-	{
-        csound = new Csound();                                          //Create an instance of Csound
-        csound->SetMessageCallback(messageCallback);
-        csoundCession();
+	static void messageCallback(CSOUND* cs, int attr, const char *format, va_list valist) {
+		//vprintf(format, valist);    //if commented -> disable csound message on terminal
+		return;
 	}
 
-    ~Flooper()
-    {
-        csound->Stop();
-        csound->Cleanup();
-        delete csound;                  //free Csound object
-    }
+	void csoundCession() {
+		//csd sampling-rate override
+		string sr_override = "--sample-rate=" + to_string(engineGetSampleRate());
+
+		//sample file load
+		string filemacro = "--omacro:Filepath=" + filePath;
+
+		//compile instance of csound
+		notReady = csound->Compile(assetPlugin(plugin, "csd/Flooper.csd").c_str(), sr_override.c_str(), filemacro.c_str());
+		if(!notReady)
+		{
+			spout = csound->GetSpout();							//access csound output buffer
+			spin  = csound->GetSpin();							//access csound input buffer
+			ksmps = csound->GetKsmps();
+
+			fileDesc = stringFilename(filePath)+ "\n";
+			fileDesc += std::to_string((int) csound->GetChannel("FileSr", NULL)) + " Hz" + "\n";
+			fileDesc += std::to_string(csound->GetChannel("FileLen", NULL)) + " s.";
+
+			//display buffer setting
+			double *temp;
+			int tableSize = csound->GetTable(temp, 1);
+
+			vector<double>().swap(displayBuff);
+			for (int i=0; i < tableSize; i++)
+				displayBuff.push_back(temp[i]);
+		}
+		else {
+			cout << "Csound csd compilation error!" << endl;
+			fileDesc = "Right click to load \n a aiff, wav, ogg or flac audio file";
+		}
+	}
+
+	Flooper() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS) {
+		csound = new Csound();									//Create an instance of Csound
+		csound->SetMessageCallback(messageCallback);
+		csoundCession();
+	}
+
+	~Flooper() {
+		csound->Stop();
+		csound->Cleanup();
+		delete csound;											//free Csound object
+	}
 
 	void step() override;
 	void reset() override;
@@ -106,7 +101,6 @@ struct Flooper : Module {
 
 
 	// persistence
-	
 	json_t *toJson() override {
 		json_t *rootJ = json_object();
 		// lastPath
@@ -125,89 +119,87 @@ struct Flooper : Module {
 };
 
 void Flooper::onSampleRateChange() {
-    //csound restart with new sample rate
-    notReady = true;
-    csound->Reset();
-    csoundCession();
+	//csound restart with new sample rate
+	notReady = true;
+	csound->Reset();
+	csoundCession();
 };
 
 void Flooper::reset() {
-    //menu initialize: csound restart with modified (or not!) csound script csd
-    notReady = true;
-    csound->Reset();
-    csoundCession();
+	//menu initialize: csound restart with modified (or not!) csound script csd
+	notReady = true;
+	csound->Reset();
+	csoundCession();
 }
 
 void Flooper::loadSample(std::string path) {
+	filePath = path;
+	lastPath = path;
 
-    filePath = path;
-    lastPath = path;
-
-    notReady = true;
-    csound->Reset();
-    csoundCession();
+	notReady = true;
+	csound->Reset();
+	csoundCession();
 };
 
 void Flooper::step() {
-    float out=0.0;
+	float out=0.0;
 
-    if(notReady) return;            //output set to zero
+	if(notReady) return;            //output set to zero
 
-    //Process
-    if(nbSample == 0)   //param refresh at control rate
-    {
-        //params
-        if(inputs[START_INPUT].active) {
-    		start = clamp(inputs[START_INPUT].value*0.125f, 0.0f, 1.0f);
-     	} else {
-       		start = params[START_PARAM].value;
-       	};
+	//Process
+	if(nbSample == 0)   //param refresh at control rate
+	{
+		//params
+		if(inputs[START_INPUT].active) {
+			start = clamp(inputs[START_INPUT].value*0.125f, 0.0f, 1.0f);
+		} else {
+			start = params[START_PARAM].value;
+		};
 
-        if(inputs[END_INPUT].active) {
-    		end = clamp(inputs[END_INPUT].value*0.125f, 0.0f, 1.0f);
-     	} else {
-       		end = params[END_PARAM].value;
-       	};
+		if(inputs[END_INPUT].active) {
+			end = clamp(inputs[END_INPUT].value*0.125f, 0.0f, 1.0f);
+		} else {
+			end = params[END_PARAM].value;
+		};
 
-        if(inputs[TRANSPOSE_INPUT].active) {
-    		transpose = clamp(inputs[TRANSPOSE_INPUT].value, -12.0f, +12.0f);
-     	} else {
-       		transpose = params[TRANSPOSE_PARAM].value;
-       	};
-        transpose = round(transpose);
+		if(inputs[TRANSPOSE_INPUT].active) {
+			transpose = clamp(inputs[TRANSPOSE_INPUT].value, -12.0f, +12.0f);
+		} else {
+			transpose = params[TRANSPOSE_PARAM].value;
+		};
+		transpose = round(transpose);
 
-        gate = clamp(inputs[GATE_INPUT].value*0.125f, 0.0f, 1.0f);
-     	loop = params[LOOP_PARAM].value;
+		gate = clamp(inputs[GATE_INPUT].value*0.125f, 0.0f, 1.0f);
+		loop = params[LOOP_PARAM].value;
 
-        csound->SetChannel("Start", start);
-        csound->SetChannel("End", end);
-        csound->SetChannel("Transpose", transpose);
-        csound->SetChannel("Loop", loop);
-        csound->SetChannel("Gate", gate);
+		csound->SetChannel("Start", start);
+		csound->SetChannel("End", end);
+		csound->SetChannel("Transpose", transpose);
+		csound->SetChannel("Loop", loop);
+		csound->SetChannel("Gate", gate);
 
-        samplePos = csound->GetChannel("SamplePos", NULL);
+		samplePos = csound->GetChannel("SamplePos", NULL);
 
-        result = csound->PerformKsmps();
-    }
-    if(!result)
-    {
-        out = spout[nbSample];
-        nbSample++;
-        if (nbSample == ksmps)      //nchnls = 1
-            nbSample = 0;
-    }
-    outputs[OUT_OUTPUT].value = out*4.0;
+		result = csound->PerformKsmps();
+	}
+	if(!result)
+	{
+		out = spout[nbSample];
+		nbSample++;
+		if (nbSample == ksmps)			//nchnls = 1
+			nbSample = 0;
+	}
+	outputs[OUT_OUTPUT].value = out*4.0;
 }
 
-
-struct FlooperDisplay : TransparentWidget {         //code from Clement Foulc player module
+struct FlooperDisplay : TransparentWidget {			//code from Clement Foulc player module
 	Flooper *module;
 	shared_ptr<Font> font;
 
 	FlooperDisplay() {
 		font = Font::load(assetGlobal("res/fonts/DejaVuSans.ttf"));
 	}
-	
+
 	void draw(NVGcontext *vg) override {
 		nvgFontSize(vg, 12);
 		nvgFontFaceId(vg, font->handle);
@@ -217,10 +209,10 @@ struct FlooperDisplay : TransparentWidget {         //code from Clement Foulc pl
 
 		nvgStrokeColor(vg, nvgRGBA(0xff, 0xff, 0xff, 0x40));                //line color
 
-        int offset = 5;
-        int start = offset + (module->start) * 160;
-        int end   = offset + (module->end)   * 160;
-        int samplePos = offset + (module->samplePos) * 160;
+ 		int offset = 5;
+ 		int start = offset + (module->start) * 160;
+ 		int end   = offset + (module->end)   * 160;
+ 		int samplePos = offset + (module->samplePos) * 160;
 
 		// Draw ref line
 		{
@@ -246,11 +238,11 @@ struct FlooperDisplay : TransparentWidget {         //code from Clement Foulc pl
 			nvgClosePath(vg);
 		}
 		nvgStroke(vg);
-		
+
 		if (module->notReady == false) {
 			// Draw play line
 			nvgStrokeColor(vg, nvgRGBA(0x28, 0xb0, 0xf3, 0xff));
-            nvgStrokeWidth(vg, 0.8);
+			nvgStrokeWidth(vg, 0.8);
 			{
 				nvgBeginPath(vg);
 				nvgMoveTo(vg, samplePos, 70);
@@ -258,12 +250,12 @@ struct FlooperDisplay : TransparentWidget {         //code from Clement Foulc pl
 				nvgClosePath(vg);
 			}
 			nvgStroke(vg);
-            
-            // Draw waveform
-			nvgStrokeColor(vg, nvgRGBA(0xff, 0xff, 0x3e, 0xff));            //wave color
+
+			// Draw waveform
+			nvgStrokeColor(vg, nvgRGBA(0xff, 0xff, 0x3e, 0xff));				//wave color
 			nvgSave(vg);
 			Rect b = Rect(Vec(5, 75), Vec(160, 30));
-            nvgScissor(vg, b.pos.x, b.pos.y, b.size.x, b.size.y);
+			nvgScissor(vg, b.pos.x, b.pos.y, b.size.x, b.size.y);
 			nvgBeginPath(vg);
 
 			for (unsigned int i = 0; i < module->displayBuff.size(); i++) {
@@ -278,7 +270,7 @@ struct FlooperDisplay : TransparentWidget {         //code from Clement Foulc pl
 				else
 					nvgLineTo(vg, p.x, p.y);
 			}
-			
+
 			nvgLineCap(vg, NVG_ROUND);
 			nvgMiterLimit(vg, 2.0);
 			nvgStrokeWidth(vg, 0.5);
@@ -299,7 +291,7 @@ FlooperWidget::FlooperWidget(Flooper *module) : ModuleWidget(module) {
 	setPanel(SVG::load(assetPlugin(plugin, "res/Flooper.svg")));
 
 	{
-	    FlooperDisplay *display = new FlooperDisplay();
+		FlooperDisplay *display = new FlooperDisplay();
 		display->module = module;
 		display->box.pos = Vec(5, 40);
 		display->box.size = Vec(130, 250);
