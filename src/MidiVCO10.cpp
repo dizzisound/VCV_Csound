@@ -1,89 +1,88 @@
 #include "VCV_Csound.hpp"
 #include <csound/csound.hpp>
 #include <iostream>
-#include <vector>
-
 
 using namespace std;
 
 
 struct MidiVCO10 : Module {
 	enum ParamIds {
-		WAVEFORM_PARAM,
-		OCTAVE_PARAM,
-		SEMITONE_PARAM,
-		HARM_PARAM,
-		PWM_PARAM,
-		PMDEPTH_PARAM,
-		PMRATE_PARAM,
-		NOISEBW_PARAM,
-		NUM_PARAMS
+	WAVEFORM_PARAM,
+	OCTAVE_PARAM,
+	SEMITONE_PARAM,
+	HARM_PARAM,
+	PWM_PARAM,
+	PMDEPTH_PARAM,
+	PMRATE_PARAM,
+	NOISEBW_PARAM,
+	NUM_PARAMS
 	};
 	enum InputIds {
-	    WAVEFORM_INPUT,
-		OCTAVE_INPUT,
-		SEMITONE_INPUT,
-		HARM_INPUT,
-		PWM_INPUT,
-		PMDEPTH_INPUT,
-		PMRATE_INPUT,
-		NOISEBW_INPUT,
-		NUM_INPUTS
+	WAVEFORM_INPUT,
+	OCTAVE_INPUT,
+	SEMITONE_INPUT,
+	HARM_INPUT,
+	PWM_INPUT,
+	PMDEPTH_INPUT,
+	PMRATE_INPUT,
+	NOISEBW_INPUT,
+	NUM_INPUTS
 	};
 	enum OutputIds {
-	    GATE_OUTPUT,
-		OUT_OUTPUT,
-		NUM_OUTPUTS
+	GATE_OUTPUT,
+	OUT_OUTPUT,
+	NUM_OUTPUTS
 	};
 	enum LightIds {
-		NUM_LIGHTS
+	NUM_LIGHTS
 	};
 
-    Csound* csound;
-    MYFLT *spin, *spout;
+	Csound* csound;
+	MYFLT *spin, *spout;
 
-    int nbSample = 0;
-    int ksmps, result;
-    bool notReady;
-    //int const nchnls = 1;       // 1 output in csd
-    float waveform, octave, semitone, harm, pwm, pmdepth, pmrate, noisebw, gate;
+	int nbSample = 0;
+	int ksmps, result;
+	bool notReady;
+	//int const nchnls = 1;			// 1 output in csd
+	float waveform, octave, semitone, harm, pwm, pmdepth, pmrate, noisebw, gate;
 
-    string waveDesc;
-    string waveType[10]={"SAWTOOTH", "SQUARE \n PWM", "RAMP \n PWM", "PULSE", "PARABOLA", "SQUARE", "TRIANGLE", "USER WAVE \n Trapezoid", "BUZZ", "PINK NOISE \n Band Width"};
+	string waveDesc;
+	string waveType[10]={"SAWTOOTH", "SQUARE \n PWM", "RAMP \n PWM", "PULSE", "PARABOLA", "SQUARE", "TRIANGLE", "USER WAVE \n Trapezoid", "BUZZ", "PINK NOISE \n Band Width"};
 
-    static void messageCallback(CSOUND* cs, int attr, const char *format, va_list valist)
-    {
-        //vprintf(format, valist);    //if commented -> disable csound message on terminal
-        return;
-    }
+	static void messageCallback(CSOUND* cs, int attr, const char *format, va_list valist) {
+		//vprintf(format, valist);			//if commented -> disable csound message on terminal
+		return;
+	}
 
-    void csoundCession() {
-        //csd sampling-rate override
-        string sr_override = "--sample-rate=" + to_string(engineGetSampleRate());
+	void csoundCession() {
+		//csd sampling-rate override
+		string sr_override = "--sample-rate=" + to_string(engineGetSampleRate());
 
-        //compile instance of csound
-        notReady = csound->Compile(assetPlugin(plugin, "csd/MidiVCO10.csd").c_str(), (char *) sr_override.c_str());
-	    if(!notReady)
-        {
-            spout = csound->GetSpout();                                     //access csound output buffer
-            spin  = csound->GetSpin();                                      //access csound input buffer
-            ksmps = csound->GetKsmps();
-        }
-	    else
-	        cout << "Csound csd compilation error!" << endl;
-    }
+		//compile instance of csound
+		notReady = csound->Compile(assetPlugin(plugin, "csd/MidiVCO10.csd").c_str(), sr_override.c_str());
+		if(!notReady)
+		{
+			spout = csound->GetSpout();								//access csound output buffer
+			spin  = csound->GetSpin();								//access csound input buffer
+			ksmps = csound->GetKsmps();
+		}
+		else
+			cout << "Csound csd compilation error!" << endl;
+	}
 
 	MidiVCO10() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS)
 	{
-        csound = new Csound();                                          //Create an instance of Csound
-        csound->SetMessageCallback(messageCallback);
-        csoundCession();
+		csound = new Csound();										//Create an instance of Csound
+		csound->SetMessageCallback(messageCallback);
+		csoundCession();
 	}
 
-    ~MidiVCO10()
-    {
-        delete csound;                  //free Csound object
-    }
+	~MidiVCO10()
+	{
+		csound->Stop();
+		csound->Cleanup();
+		delete csound;						//free Csound object
+	}
 
 	void step() override;
 	void reset() override;
@@ -91,92 +90,93 @@ struct MidiVCO10 : Module {
 };
 
 void MidiVCO10::onSampleRateChange() {
-    //csound restart with new sample rate
-    notReady = true;
-    csound->Reset();
-    csoundCession();
+	//csound restart with new sample rate
+	notReady = true;
+	csound->Reset();
+	csoundCession();
 };
 
 void MidiVCO10::reset() {
-    //menu initialize: csound restart with modified (or not!) csound script csd
-    notReady = true;
-    csound->Reset();
-    csoundCession();
+	//menu initialize: csound restart with modified (or not!) csound script csd
+	notReady = true;
+	csound->Reset();
+	csoundCession();
 }
 
 void MidiVCO10::step() {
-    float out=0.0;
+	float out=0.0;
 
-    if(notReady) return;            //output set to zero
+	if(notReady) return;            //output set to zero
 
-    //Process
-    if(nbSample == 0)   //param refresh at control rate
-    {
-        //params
-        if(inputs[WAVEFORM_INPUT].active) {
-    		waveform = clamp(inputs[WAVEFORM_INPUT].value*0.125f, 0.0f, 1.0f);
-     	} else {
-       		waveform = round(params[WAVEFORM_PARAM].value);
-       	};
-        waveDesc = waveType[(int) waveform];
+	//Process
+	if(nbSample == 0)   //param refresh at control rate
+	{
+		//params
+		if(inputs[WAVEFORM_INPUT].active) {
+			waveform = clamp(inputs[WAVEFORM_INPUT].value*0.125f, 0.0f, 1.0f);
+		} else {
+			waveform = round(params[WAVEFORM_PARAM].value);
+		};
+		waveDesc = waveType[(int) waveform];
 
-        if(inputs[OCTAVE_INPUT].active) {
-    		octave = clamp(inputs[OCTAVE_INPUT].value*0.125f, 0.0f, 1.0f);
-     	} else {
-       		octave = params[OCTAVE_PARAM].value;
-       	};
-       	if(inputs[SEMITONE_INPUT].active) {
-       		semitone = clamp(inputs[SEMITONE_INPUT].value*0.125f, 0.0f, 1.0f);
-       	} else {
-       		semitone = params[SEMITONE_PARAM].value;
-       	};
-       	if(inputs[HARM_INPUT].active) {
-       		harm = clamp(inputs[HARM_INPUT].value*0.125f, 0.0f, 1.0f);
-       	} else {
-       		harm = params[HARM_PARAM].value;
-       	};
-       	if(inputs[PWM_INPUT].active) {
-       		pwm = clamp(inputs[PWM_INPUT].value*0.125f, 0.0f, 1.0f);
-       	} else {
-       		pwm = params[PWM_PARAM].value;
-       	};
-       	if(inputs[PMDEPTH_INPUT].active) {
-       		pmdepth = clamp(inputs[PMDEPTH_INPUT].value*0.125f, 0.0f, 1.0f);
-       	} else {
-       		pmdepth = params[PMDEPTH_PARAM].value;
-       	};
-       	if(inputs[PMRATE_INPUT].active) {
-       		pmrate = clamp(inputs[PMRATE_INPUT].value*0.125f, 0.0f, 1.0f);
-       	} else {
-       		pmrate = params[PMRATE_PARAM].value;
-       	};
-       	if(inputs[NOISEBW_INPUT].active) {
-       		noisebw = clamp(inputs[NOISEBW_INPUT].value*0.125f, 0.0f, 1.0f);
-       	} else {
-       		noisebw = params[NOISEBW_PARAM].value;
-       	};
-        csound->SetChannel("Waveform", waveform);
-        csound->SetChannel("Octave", octave);
-        csound->SetChannel("Semitone", semitone);
-        csound->SetChannel("Harmonics", harm);
-        csound->SetChannel("PulseWidth", pwm);
-        csound->SetChannel("PhaseDepth", pmdepth);
-        csound->SetChannel("PhaseRate", pmrate);
-        csound->SetChannel("NoiseBW", noisebw);
+		if(inputs[OCTAVE_INPUT].active) {
+			octave = clamp(inputs[OCTAVE_INPUT].value*0.125f, 0.0f, 1.0f);
+		} else {
+			octave = params[OCTAVE_PARAM].value;
+		};
+		if(inputs[SEMITONE_INPUT].active) {
+			semitone = clamp(inputs[SEMITONE_INPUT].value*0.125f, 0.0f, 1.0f);
+		} else {
+			semitone = params[SEMITONE_PARAM].value;
+		};
+		if(inputs[HARM_INPUT].active) {
+			harm = clamp(inputs[HARM_INPUT].value*0.125f, 0.0f, 1.0f);
+		} else {
+			harm = params[HARM_PARAM].value;
+		};
+		if(inputs[PWM_INPUT].active) {
+			pwm = clamp(inputs[PWM_INPUT].value*0.125f, 0.0f, 1.0f);
+		} else {
+			pwm = params[PWM_PARAM].value;
+		};
+		if(inputs[PMDEPTH_INPUT].active) {
+			pmdepth = clamp(inputs[PMDEPTH_INPUT].value*0.125f, 0.0f, 1.0f);
+		} else {
+			pmdepth = params[PMDEPTH_PARAM].value;
+		};
+		if(inputs[PMRATE_INPUT].active) {
+			pmrate = clamp(inputs[PMRATE_INPUT].value*0.125f, 0.0f, 1.0f);
+		} else {
+			pmrate = params[PMRATE_PARAM].value;
+		};
+		if(inputs[NOISEBW_INPUT].active) {
+			noisebw = clamp(inputs[NOISEBW_INPUT].value*0.125f, 0.0f, 1.0f);
+		} else {
+			noisebw = params[NOISEBW_PARAM].value;
+		};
 
-        gate = csound->GetChannel("Gate", NULL);
-        outputs[GATE_OUTPUT].value = gate ? 10.f : 0.f;
+		csound->SetChannel("Waveform", waveform);
+ 		csound->SetChannel("Octave", octave);
+ 		csound->SetChannel("Semitone", semitone);
+ 		csound->SetChannel("Harmonics", harm);
+ 		csound->SetChannel("PulseWidth", pwm);
+ 		csound->SetChannel("PhaseDepth", pmdepth);
+ 		csound->SetChannel("PhaseRate", pmrate);
+ 		csound->SetChannel("NoiseBW", noisebw);
 
-        result = csound->PerformKsmps();
-    }
-    if(!result)
-    {
-        out = spout[nbSample];
-        nbSample++;
-        if (nbSample == ksmps)      //nchnls = 1
-            nbSample = 0;
-    }
-    outputs[OUT_OUTPUT].value = out*4.0;
+		gate = csound->GetChannel("Gate", NULL);
+		outputs[GATE_OUTPUT].value = gate ? 10.f : 0.f;
+
+		result = csound->PerformKsmps();
+	}
+	if(!result)
+	{
+		out = spout[nbSample];
+		nbSample++;
+		if (nbSample == ksmps)			//nchnls = 1
+			nbSample = 0;
+	}
+	outputs[OUT_OUTPUT].value = out*4.0;
 }
 
 struct MidiVCO10Display : TransparentWidget {
@@ -194,7 +194,7 @@ struct MidiVCO10Display : TransparentWidget {
 		nvgFillColor(vg, nvgRGBA(0xff, 0xff, 0x3e, 0xff));              //textColor
 		nvgTextBox(vg, 15, 75, 88, module->waveDesc.c_str(), NULL);     //text
 		nvgStroke(vg);
-    }
+	}
 };
 
 struct MidiVCO10Widget : ModuleWidget {
@@ -205,7 +205,7 @@ MidiVCO10Widget::MidiVCO10Widget(MidiVCO10 *module) : ModuleWidget(module) {
 	setPanel(SVG::load(assetPlugin(plugin, "res/MidiVCO10.svg")));
 
 	{
-	    MidiVCO10Display *display = new MidiVCO10Display();
+		MidiVCO10Display *display = new MidiVCO10Display();
 		display->module = module;
 		addChild(display);
 	}
@@ -238,5 +238,4 @@ MidiVCO10Widget::MidiVCO10Widget(MidiVCO10 *module) : ModuleWidget(module) {
 }
 
 Model *modelMidiVCO10 = Model::create<MidiVCO10, MidiVCO10Widget>("VCV_Csound", "MidiVCO10", "Midi VCO 10 Waves", OSCILLATOR_TAG);
-
 
