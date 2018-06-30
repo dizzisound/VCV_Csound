@@ -7,75 +7,75 @@ using namespace std;
 
 struct Vocoder : Module {
 	enum ParamIds {
-		BANDWIDTH_PARAM,
-		BANDSPACING_PARAM,
-		BASE_PARAM,
-		CARFILTER_PARAM,
-		BPF_PARAM,
-		HPF_PARAM,
-		GATE_PARAM,
-		STEPNESS_PARAM,
-		NUM_PARAMS
+	BANDWIDTH_PARAM,
+	BANDSPACING_PARAM,
+	BASE_PARAM,
+	CARFILTER_PARAM,
+	BPF_PARAM,
+	HPF_PARAM,
+	GATE_PARAM,
+	STEPNESS_PARAM,
+	NUM_PARAMS
 	};
 	enum InputIds {
-		MOD_INPUT,
-		CAR_INPUT,
-		BANDWIDTH_INPUT,
-		BANDSPACING_INPUT,
-		BASE_INPUT,
-		NUM_INPUTS
+	MOD_INPUT,
+	CAR_INPUT,
+	BANDWIDTH_INPUT,
+	BANDSPACING_INPUT,
+	BASE_INPUT,
+	NUM_INPUTS
 	};
 	enum OutputIds {
-		OUT_OUTPUT,
-		NUM_OUTPUTS
+	OUT_OUTPUT,
+	NUM_OUTPUTS
 	};
 
-    Csound* csound;
+	Csound* csound;
 
-    MYFLT *spin, *spout;
+	MYFLT *spin, *spout;
 
-    int nbSample = 0;
-    int ksmps, result;
-    int const nchnls = 2;       // 2 inputs and 2 outputs in csd
+	int nbSample = 0;
+	int ksmps, result;
+	int const nchnls = 2;				// 2 inputs and 2 outputs in csd
 
-    bool notReady;
+	bool notReady;
 
-    float bandwidth, bandspacing, base, bpGain, hpGain, carFilter, steepness, gate;
+	float bandwidth, bandspacing, base, bpGain, hpGain, carFilter, steepness, gate;
 
 
+	static void messageCallback(CSOUND* cs, int attr, const char *format, va_list valist) {
+		//vprintf(format, valist);			//if commented -> disable csound message on terminal
+		return;
+	}
 
-    static void messageCallback(CSOUND* cs, int attr, const char *format, va_list valist)
-    {
-        //vprintf(format, valist);    //if commented -> disable csound message on terminal
-        return;
-    }
+	void csoundCession() {
+		//csd sampling-rate override
+		string sr_override = "--sample-rate=" + to_string(engineGetSampleRate());
 
-    void csoundCession() {
-        //csd sampling-rate override
-        string sr_override = "--sample-rate=" + to_string(engineGetSampleRate());
-
-        //compile instance of csound
-        notReady = csound->Compile(assetPlugin(plugin, "csd/Vocoder.csd").c_str(), (char *) sr_override.c_str());
-	    if(!notReady)
-	    {
-            spout = csound->GetSpout();                                     //access csound output buffer
-            spin  = csound->GetSpin();                                      //access csound input buffer
-            ksmps = csound->GetKsmps();
-        }
-	    else
-	        cout << "Csound csd compilation error!" << endl;
-    }
+		//compile instance of csound
+		notReady = csound->Compile(assetPlugin(plugin, "csd/Vocoder.csd").c_str(), sr_override.c_str());
+		if(!notReady)
+		{
+			spout = csound->GetSpout();								//access csound output buffer
+			spin  = csound->GetSpin();								//access csound input buffer
+			ksmps = csound->GetKsmps();
+		}
+		else
+			cout << "Csound csd compilation error!" << endl;
+	}
 
 	Vocoder() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS)
 	{
-        csound = new Csound();                                          //Create an instance of Csound
-        csound->SetMessageCallback(messageCallback);
-        csoundCession();
+		csound = new Csound();                                          //Create an instance of Csound
+		csound->SetMessageCallback(messageCallback);
+		csoundCession();
 	}
 
-    ~Vocoder()
-    {
-        delete csound;                  //free Csound object
+	~Vocoder()
+	{
+		csound->Stop();
+		csound->Cleanup();
+		delete csound;													//free Csound object
     }
 
 	void step() override;
@@ -84,78 +84,76 @@ struct Vocoder : Module {
 };
 
 void Vocoder::onSampleRateChange() {
-    //csound restart with new sample rate
-    notReady = true;
-    csound->Reset();
-    csoundCession();
+	//csound restart with new sample rate
+	notReady = true;
+	csound->Reset();
+	csoundCession();
 };
 
 void Vocoder::reset() {
-    //menu initialize: csound restart with modified (or not!) csound script csd
-    notReady = true;
-    csound->Reset();
-    csoundCession();
+	//menu initialize: csound restart with modified (or not!) csound script csd
+	notReady = true;
+	csound->Reset();
+	csoundCession();
 }
 
 void Vocoder::step() {
-    float out=0.0;
+	float out=0.0;
 
-    if(notReady) return;            //outputs set to zero
+	if(notReady) return;            //outputs set to zero
 
-    //Process
-    float in1 = clamp(inputs[MOD_INPUT].value,-10.0f,10.0f);
-    float in2 = clamp(inputs[CAR_INPUT].value,-10.0f,10.0f);
+	//Process
+	float in1 = clamp(inputs[MOD_INPUT].value,-10.0f,10.0f);
+	float in2 = clamp(inputs[CAR_INPUT].value,-10.0f,10.0f);
 
-    if(nbSample == 0)   //param refresh at control rate
-    {
-        //params
-        if(inputs[BANDWIDTH_INPUT].active) {
-    		bandwidth = clamp(inputs[BANDWIDTH_INPUT].value*0.125f, 0.0f, 1.0f);
-     	} else {
-       		bandwidth = params[BANDWIDTH_PARAM].value;
-       	};
+	if(nbSample == 0)   //param refresh at control rate
+	{
+		//params
+		if(inputs[BANDWIDTH_INPUT].active) {
+			bandwidth = clamp(inputs[BANDWIDTH_INPUT].value*0.125f, 0.0f, 1.0f);
+		} else {
+			bandwidth = params[BANDWIDTH_PARAM].value;
+		};
+		if(inputs[BANDSPACING_INPUT].active) {
+			bandspacing = clamp(inputs[BANDSPACING_INPUT].value*0.125f, 0.0f, 1.0f);
+		} else {
+			bandspacing = params[BANDSPACING_PARAM].value;
+		};
+		if(inputs[BASE_INPUT].active) {
+			base = clamp(inputs[BASE_INPUT].value*8.0f, 24.0f, 80.0f);
+		} else {
+			base = params[BASE_PARAM].value;
+		};
 
-       	if(inputs[BANDSPACING_INPUT].active) {
-       		bandspacing = clamp(inputs[BANDSPACING_INPUT].value*0.125f, 0.0f, 1.0f);
-       	} else {
-       		bandspacing = params[BANDSPACING_PARAM].value;
-       	};
+		steepness   = params[STEPNESS_PARAM].value;
+		bpGain      = params[BPF_PARAM].value;
+		hpGain      = params[HPF_PARAM].value;
+		carFilter   = params[CARFILTER_PARAM].value;
+		gate        = params[GATE_PARAM].value;
 
-       	if(inputs[BASE_INPUT].active) {
-       		base = clamp(inputs[BASE_INPUT].value*8.0f, 24.0f, 80.0f);
-       	} else {
-       		base = params[BASE_PARAM].value;
-       	};
+		csound->SetChannel("bw", bandwidth);
+		csound->SetChannel("incr", bandspacing);
+		csound->SetChannel("base", base);
+		csound->SetChannel("BPGain", bpGain);
+		csound->SetChannel("HPGain", hpGain);
+		csound->SetChannel("carFilter", carFilter);
+		csound->SetChannel("steepness", steepness);
+		csound->SetChannel("gate", gate);
 
-        steepness   = params[STEPNESS_PARAM].value;
-   		bpGain      = params[BPF_PARAM].value;
-   		hpGain      = params[HPF_PARAM].value;
-        carFilter   = params[CARFILTER_PARAM].value;
-        gate        = params[GATE_PARAM].value;
+		result = csound->PerformKsmps();
+	}
 
-        csound->SetChannel("bw", bandwidth);
-        csound->SetChannel("incr", bandspacing);
-        csound->SetChannel("base", base);
-        csound->SetChannel("BPGain", bpGain);
-        csound->SetChannel("HPGain", hpGain);
-        csound->SetChannel("carFilter", carFilter);
-        csound->SetChannel("steepness", steepness);
-        csound->SetChannel("gate", gate);
-
-        result = csound->PerformKsmps();
-    }
-
-    if(!result)
-    {
-        spin[nbSample] = in1;
- 	    out = spout[nbSample];
-        nbSample++;
-        spin[nbSample] = in2;
-  	    nbSample++;
-        if (nbSample == ksmps*nchnls)
-            nbSample = 0;
-    }
-    outputs[OUT_OUTPUT].value = out*4.0;
+	if(!result)
+	{
+		spin[nbSample] = in1;
+		out = spout[nbSample];
+		nbSample++;
+		spin[nbSample] = in2;
+		nbSample++;
+		if (nbSample == ksmps*nchnls)
+			nbSample = 0;
+	}
+	outputs[OUT_OUTPUT].value = out*4.0;
 }
 
 struct VocoderWidget : ModuleWidget {
