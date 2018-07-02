@@ -47,8 +47,7 @@ These csound scripts are often made by others and modified by me to suit my desi
 
 ![](images/Reverb.png) 
 
-Csound script: Reverb.csd (Iain McCurdy)
-
+Csound script: Reverb.csd (Iain McCurdy)\
 The reverbsc opcode is a 8 delay line Feedback Delay Network reverb, with feedback matrix based upon physical modeling scattering junction of 8 lossless waveguides of equal characteristic impedance. (Sean Costello, October 1999)
 
 
@@ -56,8 +55,7 @@ The reverbsc opcode is a 8 delay line Feedback Delay Network reverb, with feedba
 
 ![](images/Vocoder.png) 
 
-Csound script: Vocoder.csd (Iain McCurdy)
-
+Csound script: Vocoder.csd (Iain McCurdy)\
 This is an implementation of a traditional analogue style vocoder. Two audio signals, referred to as a modulator and a carrier, are passed into the vocoder effect.
 The modulator is typically a voice and the carrier is typically a synthesizer.
 The modulator is analysed by being passed into a multiband filter (a bank of bandpass filters), the amplitude envelope of each band is tracked and a control function for each band generated.
@@ -85,7 +83,7 @@ The carrier signal is also passed through a matching multiband filter, the set o
 	Gain of the single highpass filter.
 
 **Gate Input:**
-	Activating this switch will apply a noise gate to the modulator signal.
+	Activating this switch will apply a noise gate to the modulator signal.\
 	This option might be useful if the microphone used in rather noisy, such as would be the case if using the built-in microphone on a laptop, or if working in a noisy environment.
 
 
@@ -94,27 +92,24 @@ The carrier signal is also passed through a matching multiband filter, the set o
 
 ![](images/VCO-10.png) 
 
-Csound script: VCO10.csd (Iain McCurdy)
-
+Csound script: VCO10.csd (Iain McCurdy)\
 The vco2 opcode models a variety of waveforms based on the integration of band-limited impulses.
 
 * **MidiVCO-10 module:**
 
 ![](images/MidiVCO-10.png) 
 
-Csound script: MidiVCO10.csd (Iain McCurdy)
-
-Same module as VCO-10, but is activated by midi notes, polyphony is only limited by hardware.
+Csound script: MidiVCO10.csd (Iain McCurdy)\
+Same module as VCO-10, but is activated by midi notes,\ Polyphony is only limited by hardware.\
 Gate output is 1 if at least one note is activated, otherwise is 0.
 
 * **Flooper module:**
 
 ![](images/Flooper.png) 
 
-Csound script: Flooper.csd (Joachim Heintz)
-
-Display code is copied from PLAYER module by Clement Foulc
-Read wav, aiff, ogg and flac sound files.
+Csound script: Flooper.csd (Joachim Heintz)\
+Display code is copied from PLAYER module by Clement Foulc.\
+Module read wav, aiff, ogg and flac sound files.
 
 * **Y = F(x) module:**
 
