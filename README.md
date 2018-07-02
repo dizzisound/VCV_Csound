@@ -64,7 +64,8 @@ The carrier signal is also passed through a matching multiband filter, the set o
 **Carrier Source:**
 	External signal used as carrier signal. (sawtooth, square, pulse, noise...).
 
-Steepness: Steepness of the filters used for both analysis and carrier processing.
+**Steepness:**
+        Steepness of the filters used for both analysis and carrier processing.
 	
 **Base:**
 	Frequency of the lowest filter (both analysis and processing) expressed as a MIDI note number.
@@ -92,6 +93,7 @@ Steepness: Steepness of the filters used for both analysis and carrier processin
 ![](images/VCO-10.png) 
 
 Csound script: VCO10.csd (Iain McCurdy)
+
 The vco2 opcode models a variety of waveforms based on the integration of band-limited impulses.
 
 * **MidiVCO-10 module:**
