@@ -4,7 +4,7 @@
 Csound is a user-programmable and user-extensible sound processing language and software synthesizer. (www.csound.com)
 Csound is copyright (c) 1991 Barry Vercoe, John ffitch, and other contributors.
 
-VCVRack v0.6.1, Csound v6.11 and VCV Rack modules are compiled and tested **ONLY ON LINUX MINT 18.3**.
+VCVRack v0.6.1, Csound v6.11 and VCV Rack modules are compiled and tested **ONLY ON LINUX MINT 18.3**.\
 All modules are **Work in Progress**.
 
 Thanks to:
