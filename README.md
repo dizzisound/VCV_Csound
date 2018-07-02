@@ -100,7 +100,8 @@ The vco2 opcode models a variety of waveforms based on the integration of band-l
 ![](images/MidiVCO-10.png) 
 
 Csound script: MidiVCO10.csd (Iain McCurdy)\
-Same module as VCO-10, but is activated by midi notes,\ Polyphony is only limited by hardware.\
+Same module as VCO-10, but is activated by midi notes,\
+Polyphony is only limited by hardware.\
 Gate output is 1 if at least one note is activated, otherwise is 0.
 
 * **Flooper module:**
