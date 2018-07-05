@@ -45,17 +45,32 @@ struct Flooper : Module {
 	vector<double> displayBuff;
 
 	static void messageCallback(CSOUND* cs, int attr, const char *format, va_list valist) {
-		//vprintf(format, valist);    //if commented -> disable csound message on terminal
+		vprintf(format, valist);    //if commented -> disable csound message on terminal
 		return;
 	}
 
 	void csoundCession() {
 		//csd sampling-rate override
 		string sr_override = "--sample-rate=" + to_string(engineGetSampleRate());
+		
+		//string-replace routine --> https://stackoverflow.com/questions/4643512/replace-substring-with-another-substring-c	
+		size_t index = 0;
+		while (true) {
+			/* Locate the substring to replace. */
+			index = filePath.find("\\", index);
+			if (index == std::string::npos) break;
 
-		//sample file load
+			/* Make the replacement. */
+			filePath.replace(index, 1, "/");
+
+			/* Advance index forward so the next iteration doesn't pick it up as well. */
+			index += 1;
+		}	
+		
+		//sample file load  
 		string filemacro = "--omacro:Filepath=" + filePath;
-
+		cout << "filemacro: " << filemacro << endl;
+		
 		//compile instance of csound
 		notReady = csound->Compile(assetPlugin(plugin, "csd/Flooper.csd").c_str(), sr_override.c_str(), filemacro.c_str());
 		if(!notReady)
@@ -78,6 +93,7 @@ struct Flooper : Module {
 		}
 		else {
 			cout << "Csound csd compilation error!" << endl;
+			cout << "Filepath: " << filePath << endl;
 			fileDesc = "Right click to load \n a aiff, wav, ogg or flac audio file";
 		}
 	}
@@ -321,8 +337,14 @@ FlooperWidget::FlooperWidget(Flooper *module) : ModuleWidget(module) {
 struct FlooperItem : MenuItem {
 	Flooper *player;
 	void onAction(EventAction &e) override {
-		std::string dir = assetLocal("/plugins/VCV_Csound/samples");
+		//std::string dir = assetLocal("/plugins/VCV_Csound/samples");
+		
+		std::string dir = assetPlugin(plugin, "samples/");
+		cout << "dir: " << dir << endl;
+		
 		char *path = osdialog_file(OSDIALOG_OPEN, dir.c_str(), NULL, NULL);
+		cout << "path: " << path << endl;
+		
 		if (path) player->loadSample(path);
     	free(path);
 	}
