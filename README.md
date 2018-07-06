@@ -1,3 +1,9 @@
+> **IMPORTANT NOTE:**
+> 
+> Below you can read the original upstream repo README file.
+> For comments and instructions related to this specific "Windows-target" forked repo, see the related [README.Windows](https://github.com/dizzisound/VCV_Csound/blob/master/README.windows.md)
+
+
 # VCV_Csound
 **VCV Rack modules with Csound engine**
 
