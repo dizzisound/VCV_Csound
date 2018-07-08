@@ -30,6 +30,16 @@ ksmps	= 32
 nchnls	= 1
 0dbfs	= 1
 
+	;channel init
+	chn_k	"Waveform",		1
+	chn_k	"Octave",		1
+	chn_k	"Semitone",		1
+	chn_k	"Harmonics",	1
+	chn_k	"PulseWidth",	1
+	chn_k	"PhaseDepth",	1
+	chn_k	"PhaseRate",	1
+	chn_k	"NoiseBW",		1
+
 
 gisine	ftgen		0, 0, 4096, 10, 1													;Sine wave
 
@@ -37,18 +47,24 @@ itmp	ftgen		1, 0, 16384, 7, 0, 2048, 1, 4096, 1, 4096, -1, 4096, -1, 2048, 0	; u
 ift		vco2init	-1, 10000, 0, 0, 0, 1
 
 		massign	0, 2
+		turnon	1			;GUI update
 
 instr	1	;GUI
-	gkWave			invalue	"Waveform"
-	kOctave		invalue	"Octave"
+	gkWave			chnget	"Waveform"
+	kOctave			chnget	"Octave"
 	gkOctave		= int(kOctave)
-	kSemitone		invalue	"Semitone"
+	kSemitone		chnget	"Semitone"
 	gkSemitone		= int(kSemitone)
-	gknyx			invalue	"Harmonics"
-	gkpw			invalue	"PulseWidth"
-	gkphsDep		invalue	"PhaseDepth"
-	gkphsRte		invalue	"PhaseRate"
-	gkbw			invalue	"NoiseBW"	
+	gknyx			chnget	"Harmonics"
+	gkpw			chnget	"PulseWidth"
+	gkphsDep		chnget	"PhaseDepth"
+	gkphsRte		chnget	"PhaseRate"
+	gkbw			chnget	"NoiseBW"	
+
+	gkmode = gkWave * 2
+	if gkphsDep > 0.01 then
+		gkmode = gkmode + 16
+	endif
 endin
 
 instr	2	;POLY MIDI INPUT INSTRUMENT
@@ -60,32 +76,27 @@ instr	2	;POLY MIDI INPUT INSTRUMENT
 	imin		=		0
 	imax		=		iSemitoneBendRange / 12
 	kbend		pchbend	imin, imax
-	ioct			=		octcps(icps)
+	ioct		=		octcps(icps)
 	kcps		=		cpsoct(ioct + kbend + gkOctave + gkSemitone/12)
 	;========================================================================
 
 	iporttime	=			0.05
 	kporttime	linseg		0, 0.001, iporttime
-	kpw		portk		gkpw, kporttime
+	kpw			portk		gkpw, kporttime
 	kenv		linsegr	0, 0.01, 1, 0.01, 0
 
 	if gkWave==8 then				;buzz
 		asig	buzz		kenv*iamp, kcps,  gknyx * sr /4 / kcps, gisine	
 	elseif gkWave==9 then			;noise
-		asig	pinkish	4*iamp
+		asig	pinkish		4*iamp
 		asig	butbp		asig, kcps, kcps * gkbw
 	else								;vco2
-		kmode = gkWave * 2
-		if gkphsDep > 0.01 then
-			kmode = kmode + 16
-		endif
-
 		kphs	poscil		gkphsDep*0.5, gkphsRte, gisine			;Phase mod
 		kphs	=			kphs + 0.5								;Phase depth
 
 ;*** All this to reduce click during reinit !!!
 		kinit init 0
-		kChanged	changed	gknyx, kmode
+		kChanged	changed	gknyx, gkmode
 		if	kChanged==1	then
 			kinit = 1
 		endif
@@ -107,25 +118,13 @@ instr	2	;POLY MIDI INPUT INSTRUMENT
 ;***
 
 		Reinit_vco:
-		asig		vco2		kenv*kfade*iamp, kcps, i(kmode), kpw, kphs, i(gknyx)/2
+		asig		vco2		kenv*kfade*iamp, kcps, i(gkmode), kpw, kphs, i(gknyx)/2
 					rireturn
 	endif
 				out		asig
 endin
-
-instr	11	;INIT
-		outvalue	"Octave"		, 0.0
-		outvalue	"Semitone"	, 0.0
-		outvalue	"Harmonics"	, 0.5
-		outvalue	"PW"			, 0.5
-		outvalue	"PhaseDepth"	, 0.2
-		outvalue	"PhaseRate"	, 4.0
-		outvalue	"NoiseBW"		, 1.0
-endin
 </CsInstruments>
 <CsScore>
-i 11	0	0	;init
-i 1 0 3600
 </CsScore>
 </CsoundSynthesizer>
 <bsbPanel>
