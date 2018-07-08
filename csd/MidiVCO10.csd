@@ -11,6 +11,16 @@ nchnls  = 1
 0dbfs   = 1
 
 
+	;channel init
+	chn_k		"Waveform",		1
+	chn_k		"Octave",		1
+	chn_k		"Semitone",		1
+	chn_k		"Harmonics",	1
+	chn_k		"PulseWidth",	1
+	chn_k		"PhaseDepth",	1
+	chn_k		"PhaseRate",	1
+	chn_k		"NoiseBW",		1
+
 gisine	ftgen       0, 0, 4096, 10, 1													;Sine wave
 
 itmp	ftgen	    1, 0, 16384, 7, 0, 2048, 1, 4096, 1, 4096, -1, 4096, -1, 2048, 0	;user defined waveform: trapezoid wave
@@ -31,6 +41,11 @@ instr	1	;GUI
 	gkphsDep	chnget	"PhaseDepth"
 	gkphsRte	chnget	"PhaseRate"
 	gkbw		chnget	"NoiseBW"	
+
+	gkmode = gkWave * 2
+	if gkphsDep > 0.01 then
+		gkmode = gkmode + 16
+	endif
 
     kgate      active  2
                chnset  kgate, "Gate"
@@ -60,17 +75,12 @@ instr	2	;Poly Midi Instrument
 		asig	pinkish	4*iamp
 		asig	butbp		asig, kcps, kcps * gkbw
 	else								;vco2
-		kmode = gkWave * 2
-		if gkphsDep > 0.01 then
-			kmode = kmode + 16
-		endif
-
 		kphs	poscil		gkphsDep*0.5, gkphsRte, gisine			;Phase mod
 		kphs	=			kphs + 0.5
 
 ;*** All this to reduce click during reinit !!!
 		kinit init 0
-		kChanged	changed	gknyx, kmode
+		kChanged	changed	gknyx, gkmode
 		if	kChanged==1	then
 			kinit = 1
 		endif
@@ -92,7 +102,7 @@ instr	2	;Poly Midi Instrument
 ;***
 
 		Reinit_vco:
-		asig		vco2		kenv*kfade*iamp, kcps, i(kmode), kpw, kphs, i(gknyx)/2
+		asig		vco2		kenv*kfade*iamp, kcps, i(gkmode), kpw, kphs, i(gknyx)/2
 					rireturn
 	endif
 				out		asig
