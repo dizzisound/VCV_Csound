@@ -183,8 +183,7 @@ void Flooper::step() {
 		} else {
 			transpose = params[TRANSPOSE_PARAM].value;
 		};
-		transpose = round(transpose);
-
+		
 		gate = clamp(inputs[GATE_INPUT].value*0.125f, 0.0f, 1.0f);
 		loop = params[LOOP_PARAM].value;
 
