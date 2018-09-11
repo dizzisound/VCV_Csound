@@ -151,24 +151,24 @@ void Flooper::step() {
 	{
 		//params
 		if(inputs[START_INPUT].active) {
-			start = clamp(inputs[START_INPUT].value*0.125f, 0.0f, 1.0f);
+			start = clamp(inputs[START_INPUT].value, 0.0f, 10.0f) * 0.1f;
 		} else {
 			start = params[START_PARAM].value;
 		};
 
 		if(inputs[END_INPUT].active) {
-			end = clamp(inputs[END_INPUT].value*0.125f, 0.0f, 1.0f);
+			end = clamp(inputs[END_INPUT].value, 0.0f, 10.0f) * 0.1f;
 		} else {
 			end = params[END_PARAM].value;
 		};
 
 		if(inputs[TRANSPOSE_INPUT].active) {
-			transpose = clamp(inputs[TRANSPOSE_INPUT].value, -12.0f, +12.0f);
+			transpose = clamp(inputs[TRANSPOSE_INPUT].value, 0.0f, 10.0f) * 2.4f - 12.0f;
 		} else {
 			transpose = params[TRANSPOSE_PARAM].value;
 		};
 		
-		gate = clamp(inputs[GATE_INPUT].value*0.125f, 0.0f, 1.0f);
+		gate = clamp(inputs[GATE_INPUT].value, 0.0f, 10.0f) * 0.1f;
 		loop = params[LOOP_PARAM].value;
 
 		csound->SetChannel("Start", start);
@@ -188,7 +188,7 @@ void Flooper::step() {
 		if (nbSample == ksmps)			//nchnls = 1
 			nbSample = 0;
 	}
-	outputs[OUT_OUTPUT].value = out*4.0;
+	outputs[OUT_OUTPUT].value = out*5.0;
 }
 
 struct FlooperDisplay : TransparentWidget {			//code from Clement Foulc player module

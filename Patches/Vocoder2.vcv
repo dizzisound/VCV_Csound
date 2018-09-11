@@ -1,14 +1,10 @@
 {
-  "version": "0.6.1",
+  "version": "0.6.2b",
   "modules": [
     {
       "plugin": "VCV_Csound",
-      "version": "0.6.1",
+      "version": "0.6.2b",
       "model": "Looper",
-      "pos": [
-        14,
-        0
-      ],
       "params": [
         {
           "paramId": 0,
@@ -29,20 +25,20 @@
       ],
       "data": {
         "lastPath": "/home/moi/Programmes/Rack/plugins/VCV_Csound/samples/Kool_Skool.wav"
-      }
+      },
+      "pos": [
+        14,
+        0
+      ]
     },
     {
       "plugin": "VCV_Csound",
-      "version": "0.6.1",
+      "version": "0.6.2b",
       "model": "MidiVCO10",
-      "pos": [
-        2,
-        0
-      ],
       "params": [
         {
           "paramId": 0,
-          "value": 8.09549999
+          "value": 8.08650303
         },
         {
           "paramId": 1,
@@ -72,24 +68,24 @@
           "paramId": 7,
           "value": 2.0
         }
+      ],
+      "pos": [
+        2,
+        0
       ]
     },
     {
       "plugin": "VCV_Csound",
-      "version": "0.6.1",
+      "version": "0.6.2b",
       "model": "Vocoder",
-      "pos": [
-        26,
-        0
-      ],
       "params": [
         {
           "paramId": 0,
-          "value": 0.772999942
+          "value": 0.803000093
         },
         {
           "paramId": 1,
-          "value": 0.522000074
+          "value": 0.648000002
         },
         {
           "paramId": 2,
@@ -115,16 +111,16 @@
           "paramId": 6,
           "value": 0.0
         }
+      ],
+      "pos": [
+        30,
+        0
       ]
     },
     {
       "plugin": "Fundamental",
       "version": "0.6.0",
       "model": "Scope",
-      "pos": [
-        38,
-        0
-      ],
       "params": [
         {
           "paramId": 0,
@@ -162,16 +158,16 @@
       "data": {
         "lissajous": 0,
         "external": 0
-      }
+      },
+      "pos": [
+        46,
+        0
+      ]
     },
     {
       "plugin": "Core",
-      "version": "0.6.1",
+      "version": "0.6.2b",
       "model": "AudioInterface",
-      "pos": [
-        51,
-        0
-      ],
       "params": [],
       "data": {
         "audio": {
@@ -182,7 +178,11 @@
           "sampleRate": 44100,
           "blockSize": 256
         }
-      }
+      },
+      "pos": [
+        68,
+        0
+      ]
     }
   ],
   "wires": [
@@ -208,18 +208,11 @@
       "inputId": 1
     },
     {
-      "color": "#0c8e15",
-      "outputModuleId": 0,
-      "outputId": 0,
-      "inputModuleId": 3,
-      "inputId": 0
-    },
-    {
       "color": "#0986ad",
       "outputModuleId": 2,
       "outputId": 0,
       "inputModuleId": 3,
-      "inputId": 1
+      "inputId": 0
     },
     {
       "color": "#c91847",
@@ -229,7 +222,14 @@
       "inputId": 1
     },
     {
-      "color": "#0c8e15",
+      "color": "#c9b70e",
+      "outputModuleId": 1,
+      "outputId": 1,
+      "inputModuleId": 3,
+      "inputId": 1
+    },
+    {
+      "color": "#0986ad",
       "outputModuleId": 2,
       "outputId": 0,
       "inputModuleId": 4,

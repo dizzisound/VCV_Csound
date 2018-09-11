@@ -103,24 +103,24 @@ void Vocoder::step() {
 	if(notReady) return;            //outputs set to zero
 
 	//Process
-	float in1 = clamp(inputs[MOD_INPUT].value,-10.0f,10.0f);
-	float in2 = clamp(inputs[CAR_INPUT].value,-10.0f,10.0f);
+	float in1 = clamp(inputs[MOD_INPUT].value,-5.0f, 5.0f) * 0.2f;
+	float in2 = clamp(inputs[CAR_INPUT].value,-5.0f, 5.0f) * 0.2f;
 
 	if(nbSample == 0)   //param refresh at control rate
 	{
 		//params
 		if(inputs[BANDWIDTH_INPUT].active) {
-			bandwidth = clamp(inputs[BANDWIDTH_INPUT].value*0.125f, 0.0f, 1.0f);
+			bandwidth = clamp(inputs[BANDWIDTH_INPUT].value, 0.0f, 10.0f) * 0.1f;
 		} else {
 			bandwidth = params[BANDWIDTH_PARAM].value;
 		};
 		if(inputs[BANDSPACING_INPUT].active) {
-			bandspacing = clamp(inputs[BANDSPACING_INPUT].value*0.125f, 0.0f, 1.0f);
+			bandspacing = clamp(inputs[BANDSPACING_INPUT].value, 0.0f, 10.0f) * 0.1f;
 		} else {
 			bandspacing = params[BANDSPACING_PARAM].value;
 		};
 		if(inputs[BASE_INPUT].active) {
-			base = clamp(inputs[BASE_INPUT].value*8.0f, 24.0f, 80.0f);
+			base = clamp(inputs[BASE_INPUT].value, 0.0f, 10.0f) * 5.6f + 24.0f;
 		} else {
 			base = params[BASE_PARAM].value;
 		};
@@ -153,7 +153,7 @@ void Vocoder::step() {
 		if (nbSample == ksmps*nchnls)
 			nbSample = 0;
 	}
-	outputs[OUT_OUTPUT].value = out*4.0;
+	outputs[OUT_OUTPUT].value = out*5.0;
 }
 
 struct VocoderWidget : ModuleWidget {

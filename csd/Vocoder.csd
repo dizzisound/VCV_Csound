@@ -76,7 +76,7 @@ instr	1	;Vocoder
 
 	aCar	inch	2
 	if kCarFilter == 1 then
-		aCar	tone	aCar, 12000                 ;LP filter if carrier is PULSE
+		aCar	tone	aCar, 12000                 ;use if carrier is PULSE
 	endif 
 
 	icount	= 0
@@ -92,7 +92,7 @@ instr	1	;Vocoder
 	aCarHP	buthp	aCar, kHPcf
 	amix	=	(amix * kBPGain * 5)+(aCarHP * aEnv * kHPGain * 3)
 
-			outch 	1, amix
+			outch 	1, amix*2
 endin
 </CsInstruments>
 <CsScore>

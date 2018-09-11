@@ -17,5 +17,7 @@ void init(rack::Plugin *p) {
 	p->addModel(modelVCO10);
 	p->addModel(modelFlooper);
 	p->addModel(modelYfx);
+	p->addModel(modelDelay);
+	p->addModel(modelChorus);
 }
 

@@ -10,6 +10,8 @@ extern Model *modelMidiVCO10;
 extern Model *modelVCO10;
 extern Model *modelFlooper;
 extern Model *modelYfx;
+extern Model *modelDelay;
+extern Model *modelChorus;
 
 
 struct csKnob : RoundKnob {

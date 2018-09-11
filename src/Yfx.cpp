@@ -102,7 +102,7 @@ void Yfx::step() {
 	lights[BYPASS_LIGHT].value = bypass?10.0:0.0;
 
 	//Process
-	float in = clamp(inputs[IN_INPUT].value,-10.0f,10.0f);
+	float in = clamp(inputs[IN_INPUT].value,-5.0f, 5.0f) * 0.2f;
 
 	if(!bypass) {
 		if(nbSample == 0)						//param refresh at control rate
@@ -119,10 +119,10 @@ void Yfx::step() {
 			if (nbSample == ksmps)			//nchnls = 1
 				nbSample = 0;
 		}
-		outputs[OUT_OUTPUT].value = out*4.0;
+		outputs[OUT_OUTPUT].value = out*5.0f;
 	} else {
 		//bypass
-		outputs[OUT_OUTPUT].value = in;
+		outputs[OUT_OUTPUT].value = in*5.0f;
 	}
 }
 
