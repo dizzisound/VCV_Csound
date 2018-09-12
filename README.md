@@ -129,3 +129,14 @@ Module read wav, aiff, ogg and flac sound files.
 
 Csound script: Yfx.csd
 
+* **Stereo Delay module:**
+
+![](images/Delay.png) 
+
+Csound script: Delay.csd
+
+* **Stereo Chorus module:**
+
+![](images/Chorus.png) 
+
+Csound script: Chorus.csd

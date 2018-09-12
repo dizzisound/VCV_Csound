@@ -21,6 +21,7 @@ ift		vco2init	-1, 10000, 0, 0, 0, 1
 instr	1
 	;GUI
 	kWave		chnget	"Waveform"
+    kWave       = int(kWave)
 	kOctave		chnget	"Octave"
 	kOctave		= int(kOctave)
 	kSemitone	chnget	"Semitone"

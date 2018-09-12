@@ -111,43 +111,43 @@ void VCO10::step() {
 	{
 		//params
 		if(inputs[WAVEFORM_INPUT].active) {
-			waveform = clamp(inputs[WAVEFORM_INPUT].value*0.125f, 0.0f, 1.0f);
+			waveform = clamp(inputs[WAVEFORM_INPUT].value, 0.0f, 9.0f);
 		} else {
 			waveform = round(params[WAVEFORM_PARAM].value);
 		};
 			waveDesc = waveType[(int) waveform];
 		if(inputs[OCTAVE_INPUT].active) {
-			octave = clamp(inputs[OCTAVE_INPUT].value*0.125f, 0.0f, 1.0f);
+			octave = clamp(inputs[OCTAVE_INPUT].value, 0.0f, 10.0f) - 5.0f;
 		} else {
 			octave = params[OCTAVE_PARAM].value;
 		};
 		if(inputs[SEMITONE_INPUT].active) {
-			semitone = clamp(inputs[SEMITONE_INPUT].value*0.125f, 0.0f, 1.0f);
+			semitone = clamp(inputs[SEMITONE_INPUT].value, 0.0f, 10.0f) * 2.4f - 12.0f; 
 		} else {
 			semitone = params[SEMITONE_PARAM].value;
 		};
 		if(inputs[HARM_INPUT].active) {
-			harm = clamp(inputs[HARM_INPUT].value*0.125f, 0.0f, 1.0f);
+			harm = clamp(inputs[HARM_INPUT].value, 0.0f, 10.0f) * 0.1f;
 		} else {
 			harm = params[HARM_PARAM].value;
 		};
 		if(inputs[PWM_INPUT].active) {
-			pwm = clamp(inputs[PWM_INPUT].value*0.125f, 0.0f, 1.0f);
+			pwm = clamp(inputs[PWM_INPUT].value, 0.0f, 10.0f) * 0.1f;
 		} else {
 			pwm = params[PWM_PARAM].value;
 		};
 		if(inputs[PMDEPTH_INPUT].active) {
-			pmdepth = clamp(inputs[PMDEPTH_INPUT].value*0.125f, 0.0f, 1.0f);
+			pmdepth = clamp(inputs[PMDEPTH_INPUT].value, 0.0f, 10.0f) * 0.1f;
 		} else {
 			pmdepth = params[PMDEPTH_PARAM].value;
 		};
 		if(inputs[PMRATE_INPUT].active) {
-			pmrate = clamp(inputs[PMRATE_INPUT].value*0.125f, 0.0f, 1.0f);
+			pmrate = clamp(inputs[PMRATE_INPUT].value, 0.0f, 10.0f) * 4.9999f + 0.001f;
 		} else {
 			pmrate = params[PMRATE_PARAM].value;
 		};
 		if(inputs[NOISEBW_INPUT].active) {
-			noisebw = clamp(inputs[NOISEBW_INPUT].value*0.125f, 0.0f, 1.0f);
+			noisebw = clamp(inputs[NOISEBW_INPUT].value, 0.0f, 10.0f);
 		} else {
 			noisebw = params[NOISEBW_PARAM].value;
 		};
@@ -170,7 +170,7 @@ void VCO10::step() {
 		if (nbSample == ksmps)      //nchnls = 1
 			nbSample = 0;
 	}
-	outputs[OUT_OUTPUT].value = out*4.0;
+	outputs[OUT_OUTPUT].value = out*5.0;
 }
 
 struct VCO10Display : TransparentWidget {

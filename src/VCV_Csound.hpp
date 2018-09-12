@@ -18,6 +18,8 @@ extern Model *modelMidiVCO10;
 extern Model *modelVCO10;
 extern Model *modelFlooper;
 extern Model *modelYfx;
+extern Model *modelDelay;
+extern Model *modelChorus;
 
 #if defined _WIN32 || defined CYGWIN
 	DLL_EXPORT void init(rack::Plugin *p);

@@ -108,21 +108,21 @@ void Reverb::step() {
 	lights[BYPASS_LIGHT].value = bypass?10.0:0.0;
 
 	//Process
-	float in1 = clamp(inputs[IN1_INPUT].value,-10.0f,10.0f);
-	float in2 = clamp(inputs[IN2_INPUT].value,-10.0f,10.0f);
+	float in1 = clamp(inputs[IN1_INPUT].value,-5.0f, 5.0f) * 0.2f;
+	float in2 = clamp(inputs[IN2_INPUT].value,-5.0f, 5.0f) * 0.2f;
 
 	if(!bypass) {
 		if(nbSample == 0)   //param refresh at control rate
 		{
 			//params
 			if(inputs[FEEDBACK_INPUT].active) {
-				feedback = clamp(inputs[FEEDBACK_INPUT].value*0.125f, 0.0f, 1.0f);
+				feedback = clamp(inputs[FEEDBACK_INPUT].value, 0.0f, 10.0f) * 0.1f;
 			} else {
 				feedback = params[FEEDBACK_PARAM].value;
 			};
 
 			if(inputs[CUTOFF_INPUT].active) {
-				cutoff = clamp(inputs[CUTOFF_INPUT].value*0.125f, 0.0f, 1.0f);
+				cutoff = clamp(inputs[CUTOFF_INPUT].value, 0.0f, 10.0f) * 0.1f;
 			} else {
 				cutoff = params[CUTOFF_PARAM].value;
 			};
@@ -144,12 +144,12 @@ void Reverb::step() {
 			if (nbSample == ksmps*nchnls)
 				nbSample = 0;
 		}
-		outputs[OUT1_OUTPUT].value = out1*4.0;
-		outputs[OUT2_OUTPUT].value = out2*4.0;
+		outputs[OUT1_OUTPUT].value = out1*5.0;
+		outputs[OUT2_OUTPUT].value = out2*5.0;
 	} else {
 		//bypass
-		outputs[OUT1_OUTPUT].value = in1;
-		outputs[OUT2_OUTPUT].value = in2;
+		outputs[OUT1_OUTPUT].value = in1*5.0;;
+		outputs[OUT2_OUTPUT].value = in2*5.0;;
 	}
 }
 
