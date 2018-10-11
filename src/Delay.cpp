@@ -1,19 +1,3 @@
-
-
-
-
-/*
-TO DO:
-    Vérif echelles avec clamp, valeurs init, echelles entrées etc...
-    Csound messages actifs
-    enlever les printk2 dans le csd
-
-    doc a faire
-
-
-
-*/
-
 #include "VCV_Csound.hpp"
 #include <csound/csound.hpp>
 #include <iostream>
@@ -66,7 +50,7 @@ struct Delay : Module {
 
 
 	static void messageCallback(CSOUND* cs, int attr, const char *format, va_list valist) {
-		vprintf(format, valist);			//if commented -> disable csound message on terminal
+		//vprintf(format, valist);			//if commented -> disable csound message on terminal
 		return;
 	}
 
