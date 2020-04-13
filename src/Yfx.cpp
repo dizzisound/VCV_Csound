@@ -1,5 +1,6 @@
+#pragma once
+
 #include "VCV_Csound.hpp"
-#include "dsp/digital.hpp"          //for SchmittTrigger
 #include <csound/csound.hpp>
 #include <iostream>
 
@@ -8,20 +9,20 @@ using namespace std;
 
 struct Yfx : Module {
 	enum ParamIds {
-	BYPASS_PARAM,
-	NUM_PARAMS
+		BYPASS_PARAM,
+		NUM_PARAMS
 	};
 	enum InputIds {
-	IN_INPUT,
-	NUM_INPUTS
+		IN_INPUT,
+		NUM_INPUTS
 	};
 	enum OutputIds {
-	OUT_OUTPUT,
-	NUM_OUTPUTS
+		OUT_OUTPUT,
+		NUM_OUTPUTS
 	};
 	enum LightIds {
-	BYPASS_LIGHT,
-	NUM_LIGHTS
+		BYPASS_LIGHT,
+		NUM_LIGHTS
 	};
 
 	Csound* csound;
@@ -35,23 +36,26 @@ struct Yfx : Module {
 	bool bypass = false;
 	bool notReady;
 
-	string formula;
+	std::string formula;
 
-	SchmittTrigger buttonTrigger;
+	dsp::SchmittTrigger buttonTrigger;
 
 	static void messageCallback(CSOUND* cs, int attr, const char *format, va_list valist) {
-		//vprintf(format, valist);    //if commented -> disable csound message on terminal
+		vprintf(format, valist);    //if commented -> disable csound message on terminal
 		return;
 	}
 
-	void csoundCession() {
+	void csoundSession() {
 		//csd sampling-rate override
-		string sr_override = "--sample-rate=" + to_string(engineGetSampleRate());
-
+		std::string sr_override = "--sample-rate=" + to_string(APP->engine->getSampleRate());
 		//compile instance of csound
-		notReady = csound->Compile(assetPlugin(plugin, "csd/Yfx.csd").c_str(), sr_override.c_str());
+		csound->SetOption((char*)"-n");
+		csound->SetOption((char*)"-d");
+		csound->SetHostImplementedAudioIO(1, 0);
+		notReady = csound->Compile(asset::plugin(pluginInstance, "csd/Yfx.csd").c_str(), sr_override.c_str());
 		if(!notReady)
 		{
+			nbSample = 0;
 			spout = csound->GetSpout();								//access csound output buffer
 			spin  = csound->GetSpin();								//access csound input buffer
 			ksmps = csound->GetKsmps();
@@ -60,51 +64,81 @@ struct Yfx : Module {
 			cout << "Csound csd compilation error!" << endl;
 	}
 
-	Yfx() : Module(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS) {
-		csound = new Csound();										//Create an instance of Csound
-		csound->SetMessageCallback(messageCallback);
-		csoundCession();
+	Yfx() {
+		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+		configParam(BYPASS_PARAM, 0.0f, 10.0f, 0.0f);
 	}
 
-	~Yfx()
-	{
-		csound->Stop();
-		csound->Cleanup();
-		delete csound;												//free Csound object
+	~Yfx() {
+		notReady = true;
+		if (csound) {
+			dispose();
+		}
 	}
 
-	void step() override;
-	void reset() override;
+	void process(const ProcessArgs& args) override;
+	void onAdd() override;
+	void onRemove() override;
 	void onSampleRateChange() override;
+	void onReset() override;
+	void reset();
+	void dispose();
 };
+
+void Yfx::onAdd() {
+	notReady = true;
+	if (csound) {
+		dispose();
+	}
+	csound = new Csound(); //Create an instance of Csound
+	csound->SetMessageCallback(messageCallback);	
+	csoundSession();
+}
+
+void Yfx::onRemove() {
+	dispose();
+}
 
 void Yfx::onSampleRateChange() {
 	//csound restart with new sample rate
-	notReady = true;
-	csound->Reset();
-	csoundCession();
+	reset();
 };
+
+void Yfx::onReset() {
+	//menu initialize: csound restart with modified (or not!) csound script csd
+	reset();
+}
 
 void Yfx::reset() {
 	//menu initialize: csound restart with modified (or not!) csound script csd
 	notReady = true;
 	csound->Reset();
-	csoundCession();
+	csoundSession();
 }
 
-void Yfx::step() {
-	float out=0.0;
+void Yfx::dispose() {
+	notReady = true;
+	if (csound) {
+		csound = NULL;
+		spin = NULL;
+		spout = NULL;
+	}
+}
+
+void Yfx::process(const ProcessArgs& args) {
+	
+	MYFLT out=0.0;
 
 	if(notReady) return;						//outputs set to zero
 
 	//bypass
-	if(buttonTrigger.process(params[BYPASS_PARAM].value)) bypass = !bypass;
+	if(buttonTrigger.process(params[BYPASS_PARAM].getValue())) bypass = !bypass;
 	lights[BYPASS_LIGHT].value = bypass?10.0:0.0;
 
 	//Process
-	float in = clamp(inputs[IN_INPUT].value,-5.0f, 5.0f) * 0.2f;
+	MYFLT in = clamp(inputs[IN_INPUT].getVoltage(),-5.0f, 5.0f) * 0.2f;
 
-	if(!bypass) {
+	if(!bypass && spin && spout) {
 		if(nbSample == 0)						//param refresh at control rate
 		{
 			csound->GetStringChannel("Formula", (char *) formula.c_str());
@@ -119,10 +153,10 @@ void Yfx::step() {
 			if (nbSample == ksmps)			//nchnls = 1
 				nbSample = 0;
 		}
-		outputs[OUT_OUTPUT].value = out*5.0f;
+		outputs[OUT_OUTPUT].setVoltage(out*5.0f);
 	} else {
 		//bypass
-		outputs[OUT_OUTPUT].value = in*5.0f;
+		outputs[OUT_OUTPUT].setVoltage(in*5.0f);
 	}
 }
 
@@ -131,16 +165,18 @@ struct YfxDisplay : TransparentWidget {
 	shared_ptr<Font> font;
 
 	YfxDisplay() {
-		font = Font::load(assetGlobal("res/fonts/DejaVuSans.ttf"));
+		font = APP->window->loadFont(asset::system("res/fonts/DejaVuSans.ttf"));
 	}
 
-	void draw(NVGcontext *vg) override {
-		nvgFontSize(vg, 10);
-		nvgFontFaceId(vg, font->handle);
-		nvgTextLetterSpacing(vg, 1);
-		nvgFillColor(vg, nvgRGBA(0xff, 0xff, 0x3e, 0xff));					//textColor
-		nvgTextBox(vg, 10, 120, 70, module->formula.c_str(), NULL);			//text
-		nvgStroke(vg);
+	void draw(const DrawArgs& args) override {
+		if (module!=NULL) {
+			nvgFontSize(args.vg, 10);
+			nvgFontFaceId(args.vg, font->handle);
+			nvgTextLetterSpacing(args.vg, 1);
+			nvgFillColor(args.vg, nvgRGBA(0xff, 0xff, 0x3e, 0xff));					//textColor
+			nvgTextBox(args.vg, 10, 120, 70, module->formula.c_str(), NULL);			//text
+			nvgStroke(args.vg);
+		}
 	}
 };
 
@@ -148,8 +184,9 @@ struct YfxWidget : ModuleWidget {
 	YfxWidget(Yfx *module);
 };
 
-YfxWidget::YfxWidget(Yfx *module) : ModuleWidget(module) {
-	setPanel(SVG::load(assetPlugin(plugin, "res/Yfx.svg")));
+YfxWidget::YfxWidget(Yfx *module) {
+	setModule(module);
+	setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Yfx.svg")));
 
 	{
 		YfxDisplay *display = new YfxDisplay();
@@ -157,17 +194,18 @@ YfxWidget::YfxWidget(Yfx *module) : ModuleWidget(module) {
 		addChild(display);
 	}
 
-	addChild(Widget::create<ScrewSilver>(Vec(15, 0)));
-	addChild(Widget::create<ScrewSilver>(Vec(box.size.x-30, 0)));
-	addChild(Widget::create<ScrewSilver>(Vec(15, 365)));
-	addChild(Widget::create<ScrewSilver>(Vec(box.size.x-30, 365)));
+	addChild(createWidget<ScrewSilver>(Vec(15, 0)));
+	addChild(createWidget<ScrewSilver>(Vec(box.size.x-30, 0)));
+	addChild(createWidget<ScrewSilver>(Vec(15, 365)));
+	addChild(createWidget<ScrewSilver>(Vec(box.size.x-30, 365)));
 
-	addParam(ParamWidget::create<LEDButton>(Vec(35, 246), module, Yfx::BYPASS_PARAM, 0.0f, 10.0f, 0.0f));
-	addChild(ModuleLightWidget::create<MediumLight<RedLight>>(Vec(40,250), module, 0));
+	addParam(createParam<LEDButton>(Vec(35, 246), module, Yfx::BYPASS_PARAM));
+	
+	addChild(createLight<MediumLight<RedLight>>(Vec(40,250), module, 0));
 
-	addInput(Port::create<AudioInPort>(Vec(10, 297), Port::INPUT, module, Yfx::IN_INPUT));
-	addOutput(Port::create<AudioOutPort>(Vec(54, 297), Port::OUTPUT, module, Yfx::OUT_OUTPUT));
+	addInput(createInput<AudioInPort>(Vec(10, 297), module, Yfx::IN_INPUT));
+	
+	addOutput(createOutput<AudioOutPort>(Vec(54, 297), module, Yfx::OUT_OUTPUT));
 }
 
-Model *modelYfx = Model::create<Yfx, YfxWidget>("VCV_Csound", "Yfx", "Y = F(x)", UTILITY_TAG);
-
+Model *modelYfx = createModel<Yfx, YfxWidget>("Csound_Yfx");

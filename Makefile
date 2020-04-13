@@ -1,6 +1,3 @@
-SLUG = VCV_Csound
-VERSION = 0.6.2b
-
 RACK_DIR ?= ../..
 
 CSOUND_INCLUDE ?= /usr/local/csound/include/csound
@@ -14,7 +11,7 @@ include $(RACK_DIR)/arch.mk
 
 # linking to libraries
 ifeq ($(ARCH), win)
-	FLAGS += -DUSE_DOUBLE -I$(CSOUND_INCLUDE)
+	FLAGS += -g -w -DUSE_DOUBLE -I$(CSOUND_INCLUDE)
 	CXXFLAGS += -I$(CSOUND_INCLUDE)
 	LDFLAGS += -L$(CSOUND_LIBRARY) -lcsound64
 else

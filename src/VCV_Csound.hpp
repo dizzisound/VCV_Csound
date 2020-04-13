@@ -1,3 +1,5 @@
+#pragma once
+
 #include "rack.hpp"
 
 #if defined _WIN32 || defined __CYGWIN__
@@ -10,16 +12,16 @@
 
 using namespace rack;
 
-extern Plugin *plugin;
+extern Plugin *pluginInstance;
 
 extern Model *modelReverb;
+extern Model *modelChorus;
 extern Model *modelVocoder;
 extern Model *modelMidiVCO10;
 extern Model *modelVCO10;
 extern Model *modelFlooper;
 extern Model *modelYfx;
 extern Model *modelDelay;
-extern Model *modelChorus;
 
 #if defined _WIN32 || defined CYGWIN
 	DLL_EXPORT void init(rack::Plugin *p);
@@ -30,48 +32,50 @@ extern Model *modelChorus;
 struct csKnob : RoundKnob {
 	csKnob() : RoundKnob()
 	{
-		setSVG(SVG::load(assetPlugin(plugin,"res/Knob.svg")));
+		setSVG(APP->window->loadSvg(asset::plugin(pluginInstance,"res/Knob.svg")));
 	}
 };
 
-struct csBefacoSwitch : SVGSwitch, ToggleSwitch {
+struct csBefacoSwitch : SVGSwitch /*, ToggleSwitch*/ {
 	csBefacoSwitch() {
-		addFrame(SVG::load(assetPlugin(plugin, "res/csBefacoSwitch_0.svg")));
-		addFrame(SVG::load(assetPlugin(plugin, "res/csBefacoSwitch_1.svg")));
-		addFrame(SVG::load(assetPlugin(plugin, "res/csBefacoSwitch_2.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/csBefacoSwitch_0.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/csBefacoSwitch_1.svg")));
+		addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/csBefacoSwitch_2.svg")));
 	}
 };
 
 struct AudioInPort : SVGPort {
 	AudioInPort() {
-		background->svg = SVG::load(assetPlugin(plugin, "res/AudioInPort.svg"));
+		/*background->svg = APP->window->loadSvg(asset::plugin(pluginInstance, "res/AudioInPort.svg"));
 		background->wrap();
-		box.size = background->box.size;
+		box.size = background->box.size;*/
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/AudioInPort.svg")));
 	}
 };
 
 struct AudioOutPort : SVGPort {
 	AudioOutPort() {
-		background->svg = SVG::load(assetPlugin(plugin, "res/AudioOutPort.svg"));
+		/*background->svg = APP->window->loadSvg(asset::plugin(pluginInstance, "res/AudioOutPort.svg"));
 		background->wrap();
-		box.size = background->box.size;
+		box.size = background->box.size;*/
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/AudioOutPort.svg")));
 	}
 };
 
 struct VcInPort : SVGPort {
 	VcInPort() {
-		background->svg = SVG::load(assetPlugin(plugin, "res/VcInPort.svg"));
+		/*background->svg = APP->window->loadSvg(asset::plugin(pluginInstance, "res/VcInPort.svg"));
 		background->wrap();
-		box.size = background->box.size;
+		box.size = background->box.size;*/
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/VcInPort.svg")));
 	}
 };
 
 struct VcOutPort : SVGPort {
 	VcOutPort() {
-		background->svg = SVG::load(assetPlugin(plugin, "res/VcOutPort.svg"));
+		/*background->svg = APP->window->loadSvg(asset::plugin(pluginInstance, "res/VcOutPort.svg"));
 		background->wrap();
-		box.size = background->box.size;
+		box.size = background->box.size;*/
+		setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/VcOutPort.svg")));
 	}
 };
-
-

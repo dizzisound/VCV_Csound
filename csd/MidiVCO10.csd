@@ -2,7 +2,7 @@
 vco2 models a variety of waveforms based on the integration of band-limited impulses.
 <CsoundSynthesizer>
 <CsOptions>
--n -dm0 -+rtaudio=null -b1024 -B4096 -+rtmidi=alsa -Ma
+-n -dm0 -+rtaudio=null -b1024 -B4096 -+rtmidi=null -Ma
 </CsOptions>
 <CsInstruments>
 sr      = 44100
