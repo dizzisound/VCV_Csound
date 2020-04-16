@@ -1,0 +1,81 @@
+{
+  "slug": "VCV_Csound",
+  "name": "VCV_Csound",
+  "version": "1.0.0",
+  "license": "proprietary",
+  "brand": "dizzisound",
+  "author": "dizzisound",
+  "authorEmail": "",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "",
+  "donateUrl": "",
+  "changelogUrl": "",
+  "modules": [
+    {
+      "slug": "Csound_Reverb",
+      "name": "Csound-powered stereo Reverb",
+      "description": "Stereo Reverb powered by Csound engine",
+      "tags": [
+        "Effect","Reverb","External"
+      ]
+    },
+	{
+      "slug": "Csound_Chorus",
+      "name": "Csound-powered stereo Chorus",
+      "description": "Stereo Chorus powered by Csound engine",
+      "tags": [
+        "Effect","Chorus","External"
+      ]
+    },
+	{
+      "slug": "Csound_Delay",
+      "name": "Csound-powered stereo Delay",
+      "description": "Stereo Delay powered by Csound engine",
+      "tags": [
+        "Effect","Delay","External"
+      ]
+    },
+	{
+      "slug": "Csound_Looper",
+      "name": "Csound-powered file Looper",
+      "description": "File Looper powered by Csound engine",
+      "tags": [
+        "Sampler","External"
+      ]
+    },
+	{
+      "slug": "Csound_MidiVCO10",
+      "name": "Csound-powered Midi VCO",
+      "description": "Midi VCO10 Waves powered by Csound engine",
+      "tags": [
+        "Oscillator","Midi","External"
+      ]
+    },
+	{
+      "slug": "Csound_VCO10",
+      "name": "Csound-powered VCO",
+      "description": "VCO10 Waves powered by Csound engine",
+      "tags": [
+        "Oscillator","Synth Voice","External"
+      ]
+    },
+	{
+      "slug": "Csound_Vocoder",
+      "name": "Csound-powered Vocoder",
+      "description": "32 bands Vocoder powered by Csound engine",
+      "tags": [
+        "Vocoder","Effect","External"
+      ]
+    },
+	{
+      "slug": "Csound_Yfx",
+      "name": "Csound-powered Function Generator",
+      "description": "Y = F(x) generator powered by Csound engine",
+      "tags": [
+        "Function Generator","Utility","External"
+      ]
+    }
+  ]
+}
