@@ -1,7 +1,21 @@
-> **IMPORTANT NOTE:**
+> **IMPORTANT NOTES!**
 > 
 > Below you can read the original upstream repo README file.
-> For comments and instructions related to this specific "Windows-target" forked repo, see the related [README.Windows](https://github.com/dizzisound/VCV_Csound/blob/master/README.windows.md)
+
+> The original repo from Djack13 is currently dismissed and it was removed from Github by the original developer.
+
+> The current project is now migrated to be compliant with VCVRack API v1, and it should be possible to test workable cross-platform builds.
+
+> I encourage developers who wish to contribute with testing, tips, issues, and Mac/Linux releases.
+
+> For a general approach at development of Rack plugins leveraging the Csound synth engine, I would recommend to point at the [CabbageRack](https://github.com/rorywalsh/CabbageRack) project authored by [Rory Walsh](https://github.com/rorywalsh).
+
+> For comments and instructions related to Windows builds, Csound setup, and usage, see the related [README.Windows](https://github.com/dizzisound/VCV_Csound/blob/master/README.windows.md)
+
+> The Windows release was tested under Windows 7/Windows 8.1 64bit operating systems, and pre-installed Csound version 6.14. 
+
+> 
+
 
 
 # VCV_Csound
