@@ -2,7 +2,7 @@
   "slug": "VCV_Csound",
   "name": "VCV_Csound",
   "version": "1.0.0",
-  "license": "proprietary",
+  "license": "GPL-3.0-or-later",
   "brand": "dizzisound",
   "author": "dizzisound",
   "authorEmail": "",
